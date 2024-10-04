@@ -3,12 +3,15 @@ import { ITodo } from "../typing";
 import { Request, Response } from "express";
 import _ from 'lodash';
 import Utils from "../utils";
+import { Get, Route } from "tsoa";
+@Route("api/todo")
 export default class TodoController {
     todos: ITodo[];
     constructor() {
         this.todos = [];
     }
 
+    @Get("/")
     async getTodos(req: Request, res: Response): Promise<void> {
         try {
             res.json({
