@@ -3,96 +3,98 @@ import { ITodo } from "../typing";
 import { Request, Response } from "express";
 import _ from 'lodash';
 import Utils from "../utils";
-import { Get, Route } from "tsoa";
-@Route("api/todo")
-export default class TodoController {
-    todos: ITodo[];
-    constructor() {
-        this.todos = [];
-    }
 
-    @Get("/")
-    async getTodos(req: Request, res: Response): Promise<void> {
-        try {
+
+
+let todos: ITodo[] = [];
+async function getTodos(req: Request, res: Response): Promise<void> {
+    try {
+        res.json({
+            statusCode: 200,
+            todo: todos
+        });
+    } catch (error) {
+        res.json(Utils.report(error))
+    }
+    return;
+}
+
+async function getTodoById(req: Request<{ id: string }>, res: Response): Promise<void> {
+    try {
+        const todo = todos.find(todo => todo.id === req.params.id);
+        if (_.isEmpty(todo)) {
             res.json({
                 statusCode: 200,
-                todo: this.todos
+                todo: "Could not find todo!"
             });
-        } catch (error) {
-            res.json(Utils.report(error))
+            return
         }
-        return;
+        res.json({
+            statusCode: 200,
+            todo
+        });
+    } catch (error) {
+        res.json(Utils.report(error))
     }
+    return;
+}
 
-    async getTodoById(req: Request<{ id: string }>, res: Response): Promise<void> {
-        try {
-            const todo = this.todos.find(todo => todo.id === req.params.id);
-            if (_.isEmpty(todo)) {
-                res.json({
-                    statusCode: 200,
-                    todo: "Could not find todo!"
-                });
-                return
-            }
+async function addTodo(req: Request<{}, {}, Omit<ITodo, 'id'>>, res: Response): Promise<void> {
+    try {
+        todos.push({ id: Utils.generateId(), text: req.body.text });
+        res.json({
+            statusCode: 201,
+            message: "Todo create successfully!"
+        });
+    } catch (error) {
+        res.json(Utils.report(error))
+    }
+    return;
+}
+
+async function updateTodo(req: Request<{ id: string }, {}, Omit<ITodo,'id'>>, res: Response): Promise<void> {
+    try {
+        const todoId = req.params.id;
+        const todoIndex = todos.findIndex(t => t.id === todoId);
+
+
+        if (todoIndex < 0) {
             res.json({
-                statusCode: 200,
-                todo
+                statusCode: 400,
+                message: "Could not find todo!"
             });
-        } catch (error) {
-            res.json(Utils.report(error))
+            return
         }
-        return;
+
+        //update todos
+        todos[todoIndex] = new TodoModel(todoId, req.body.text);
+        res.json({
+            statusCode: 200,
+            message: "Todo update successfully!"
+        });
+    } catch (error) {
+        res.json(Utils.report(error))
     }
+    return;
+}
 
-    async addTodo(req: Request<{}, {}, Omit<ITodo, 'id'>>, res: Response): Promise<void> {
-        try {
-            this.todos.push(new TodoModel(Utils.generateId(), req.body.text));
-            res.json({
-                statusCode: 201,
-                message: "Todo create successfully!"
-            });
-        } catch (error) {
-            res.json(Utils.report(error))
-        }
-        return;
+async function deleteTodo(req: Request<{ id: string }>, res: Response): Promise<void> {
+    try {
+        todos = todos.filter(t => t.id !== req.params.id);
+        res.json({
+            statusCode: 200,
+            message: "Todo delete successfylly"
+        });
+    } catch (error) {
+        res.json(Utils.report(error))
     }
+    return;
+}
 
-    async updateTodo(req: Request<{ id: string }, {}, { text: string }>, res: Response): Promise<void> {
-        try {
-            const todoId = req.params.id;
-            const todoIndex = this.todos.findIndex(t => t.id === todoId);
-
-
-            if (todoIndex < 0) {
-                res.json({
-                    statusCode: 400,
-                    message: "Could not find todo!"
-                });
-                return
-            }
-
-            //update todos
-            this.todos[todoIndex] = new TodoModel(todoId, req.body.text);
-            res.json({
-                statusCode: 200,
-                message: "Todo update successfully!"
-            });
-        } catch (error) {
-            res.json(Utils.report(error))
-        }
-        return;
-    }
-
-    async deleteTodo(req: Request<{ id: string }>, res: Response): Promise<void> {
-        try {
-            this.todos = this.todos.filter(t => t.id !== req.params.id);
-            res.json({
-                statusCode: 200,
-                message: "Todo delete successfylly"
-            });
-        } catch (error) {
-            res.json(Utils.report(error))
-        }
-        return;
-    }
+export {
+    getTodoById,
+    getTodos,
+    addTodo,
+    updateTodo,
+    deleteTodo
 }

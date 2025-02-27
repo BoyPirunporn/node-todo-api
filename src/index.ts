@@ -1,29 +1,13 @@
 import express from "express";
-import Routes from "./routes";
-import { serve, setup } from 'swagger-ui-express';
+import swaggerDocs from "./swagger";
+import allRoute from './routes'
+const app = express();
 
-export default class TodoApp {
-    public app: express.Application;
-    constructor() {
-        this.app = express();
-        this.config()
-    }
+app.use(express.json());
+app.use(express.urlencoded());
 
-    public listen(port: number) {
-        this.app.listen(port, () => {
-            console.log(`TODO App listening on port ${port}`);
-        });
-    }
-
-    public config(): void {
-        this.app.use(express.json());
-        this.app.use(express.urlencoded());
-        this.app.use(express.static('public'));
-        this.app.use("/docs", serve, setup(undefined));
-        new Routes(this.app);
-
-    }
-}
-
-const todoApp = new TodoApp();
-todoApp.listen(2222);
+app.use("/", allRoute)
+app.listen(2222, () => {
+    console.log(`TODO App listening on port ${2222}`);
+    swaggerDocs(app, 2222)
+});
