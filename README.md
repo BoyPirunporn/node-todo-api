@@ -7,15 +7,17 @@ This is a simple Todo API built using Node.js and Express.js. It implements basi
 - **POST** `/todos`: Add a new todo task.
 - **PUT** `/todos/:id`: Update todo task
 - **DELETE** `/todos/:id`: Delete todo tasks.
-
+- **Swagger Documentation**: API documentation available at /api using Swagger UI for easy API interaction.
 
 
 ### 📸 Preview
-
+<img src="assets/screenshot.png"/>
 
 ### 🛠️ Technologies Used
 
-- **Backend:** NodeJs Express.js
+- **Node.js**: JavaScript runtime for building the API.
+- **Express.js**: Web framework for handling HTTP requests.
+- **Swagger UI Express**: For API documentation and testing.
 
 ### 🔧 Installation
 
